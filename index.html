@@ -913,42 +913,43 @@
 
   // =============== YOUTUBE BACKGROUND MUSIC ===============
   let ytPlayer = null;
+  let ytReady = false;
   let musicPlaying = false;
+  let wantPlay = false;
   const musicBtn = document.getElementById('musicBtn');
 
-  function startMusic() {
-    // Load YouTube IFrame API
+  // Pre-load YouTube API immediately on page load
+  (function loadYTAPI() {
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(tag);
-    musicBtn.style.display = 'flex';
-  }
+  })();
 
-  // YouTube API calls this when ready
+  // YouTube API calls this when ready — create player (paused)
   window.onYouTubeIframeAPIReady = function() {
     ytPlayer = new YT.Player('ytPlayer', {
       videoId: '1OEron4rXfk',
       playerVars: {
-        autoplay: 1,
+        autoplay: 0,
         loop: 1,
         playlist: '1OEron4rXfk',
         controls: 0,
         showinfo: 0,
         modestbranding: 1,
         rel: 0,
+        playsinline: 1,
       },
       events: {
         onReady: function(e) {
+          ytReady = true;
           e.target.setVolume(40);
-          e.target.playVideo();
-          musicPlaying = true;
-          musicBtn.textContent = '🎵';
-          musicBtn.classList.add('playing');
+          // If Yes was already clicked, start playing now
+          if (wantPlay) playMusic();
         },
         onStateChange: function(e) {
           if (e.data === YT.PlayerState.PLAYING) {
             musicPlaying = true;
-            musicBtn.textContent = '🎵';
+            musicBtn.textContent = '\uD83C\uDFB5';
             musicBtn.classList.add('playing');
           }
         }
@@ -956,17 +957,36 @@
     });
   };
 
+  function playMusic() {
+    if (ytPlayer && ytReady) {
+      try { ytPlayer.playVideo(); } catch(e) {}
+      musicPlaying = true;
+      musicBtn.textContent = '\uD83C\uDFB5';
+      musicBtn.classList.add('playing');
+    }
+  }
+
+  // Called from Yes click handler (has user gesture)
+  function startMusic() {
+    musicBtn.style.display = 'flex';
+    wantPlay = true;
+    // Try to play immediately (works if API already loaded)
+    if (ytReady) {
+      playMusic();
+    }
+  }
+
   musicBtn.addEventListener('click', () => {
-    if (!ytPlayer) return;
+    if (!ytPlayer || !ytReady) return;
     if (musicPlaying) {
       ytPlayer.pauseVideo();
       musicPlaying = false;
-      musicBtn.textContent = '🔇';
+      musicBtn.textContent = '\uD83D\uDD07';
       musicBtn.classList.remove('playing');
     } else {
       ytPlayer.playVideo();
       musicPlaying = true;
-      musicBtn.textContent = '🎵';
+      musicBtn.textContent = '\uD83C\uDFB5';
       musicBtn.classList.add('playing');
     }
   });
