@@ -3,160 +3,887 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A cute Valentine's Day page to ask someone to be your Valentine!">
-  <meta name="theme-color" content="#ffd0e5">
-  <title>Valentine's Day</title>
+  <title>For Himu ji</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Quicksand:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    .gradient-background {
-      background: linear-gradient(180deg, #ffd0e5 0%, #ffe8f2 36%, #ffffff 100%);
-      min-height: 100vh;
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      background:linear-gradient(160deg,#fff0f5 0%,#fce4ec 25%,#f3e5f5 50%,#fce4ec 75%,#fff0f5 100%);
+      min-height:100vh;overflow-x:hidden;
+      font-family:'Quicksand',sans-serif;color:#4a1942;
     }
 
-    .bounce {
-      animation: bounce 2s ease infinite;
+    /* ============ CANVAS BACKGROUNDS ============ */
+    #starCanvas,#particleCanvas{
+      position:fixed;inset:0;z-index:0;pointer-events:none;
+    }
+    #particleCanvas{z-index:1}
+
+    /* ============ CURSOR TRAIL ============ */
+    .trail-heart{
+      position:fixed;pointer-events:none;z-index:9999;
+      font-size:16px;
+      animation:trailFade 1s ease forwards;
+    }
+    @keyframes trailFade{
+      0%{opacity:1;transform:scale(1) translateY(0) rotate(0deg)}
+      100%{opacity:0;transform:scale(0) translateY(-40px) rotate(45deg)}
     }
 
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-20px);
-      }
-      60% {
-        transform: translateY(-10px);
-      }
+    /* ============ GLOWING ORBS ============ */
+    .orb{
+      position:fixed;border-radius:50%;
+      filter:blur(100px);opacity:0.25;
+      pointer-events:none;z-index:0;
+      animation:orbFloat 20s ease-in-out infinite alternate;
     }
+    @keyframes orbFloat{
+      0%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(40px,-60px) scale(1.2)}
+      66%{transform:translate(-30px,40px) scale(0.8)}
+      100%{transform:translate(20px,-20px) scale(1.1)}
+    }
+
+    /* ============ ANIMATED GRADIENT BORDER ============ */
+    .glow-border{
+      position:relative;border-radius:24px;padding:2px;
+      background:linear-gradient(var(--angle,0deg),#e8003f,#ff4f7e,#ffb7c5,#e8003f);
+      background-size:200% 200%;
+      animation:rotateBorder 4s linear infinite;
+    }
+    @keyframes rotateBorder{
+      0%{--angle:0deg;background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{--angle:360deg;background-position:0% 50%}
+    }
+    @property --angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+
+    .glow-border-inner{
+      background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);
+      border-radius:22px;padding:40px 30px;width:100%;
+    }
+
+    /* ============ PAGE 1: QUESTION ============ */
+    .main-section{
+      position:relative;z-index:10;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:20px;
+      perspective:1000px;
+    }
+    .card-3d{
+      max-width:460px;width:100%;text-align:center;
+      transition:transform 0.1s ease;
+      transform-style:preserve-3d;
+      will-change:transform;
+    }
+    .card-3d img{
+      width:260px;height:260px;object-fit:cover;
+      border-radius:16px;margin:0 auto 24px;display:block;
+      box-shadow:0 0 40px rgba(232,0,63,0.12);
+    }
+
+    /* Neon Glow Title */
+    .neon-title{
+      font-family:'Dancing Script',cursive;
+      font-size:2.2rem;font-weight:700;
+      color:#e8003f;
+      text-shadow:0 0 20px rgba(232,0,63,0.3),0 0 40px rgba(232,0,63,0.15);
+      animation:neonPulse 3s ease-in-out infinite;
+      margin-bottom:28px;line-height:1.4;
+    }
+    @keyframes neonPulse{
+      0%,100%{text-shadow:0 0 20px rgba(232,0,63,0.3),0 0 40px rgba(232,0,63,0.15)}
+      50%{text-shadow:0 0 30px rgba(232,0,63,0.5),0 0 60px rgba(232,0,63,0.25)}
+    }
+
+    /* Buttons */
+    .buttons{display:flex;gap:16px;justify-content:center;align-items:center}
+    .btn-yes{
+      background:linear-gradient(135deg,#e8003f,#ff4f7e,#e8003f);
+      background-size:200% 200%;animation:gradShift 3s ease infinite,btnGlow 2s ease infinite;
+      color:#fff;border:none;padding:14px 40px;border-radius:50px;
+      font-family:'Quicksand',sans-serif;font-size:1.15rem;font-weight:700;
+      cursor:pointer;transition:all 0.3s ease;min-width:80px;
+      box-shadow:0 0 30px rgba(232,0,63,0.35);
+    }
+    @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes btnGlow{0%,100%{box-shadow:0 0 30px rgba(232,0,63,0.35)}50%{box-shadow:0 0 50px rgba(255,79,126,0.5),0 0 80px rgba(232,0,63,0.25)}}
+    .btn-yes:hover{transform:scale(1.08)}
+    .btn-no{
+      background:rgba(255,255,255,0.6);color:#9e4a6c;
+      border:1px solid rgba(232,0,63,0.15);padding:14px 36px;
+      border-radius:50px;font-family:'Quicksand',sans-serif;
+      font-size:1rem;font-weight:500;cursor:pointer;
+      transition:all 0.3s ease;min-width:80px;
+    }
+    #noButton.runaway{position:fixed;z-index:50}
+
+    /* ============ JOURNEY (after Yes) ============ */
+    #journey{display:none}
+
+    /* Snap scroll sections */
+    .snap-container{
+      scroll-snap-type:y proximity;
+      overflow-y:auto;height:100vh;
+      scroll-behavior:smooth;
+    }
+    .snap-section{
+      scroll-snap-align:start;
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:40px 24px;position:relative;z-index:10;
+    }
+
+    /* ---- Celebration ---- */
+    .mega-title{
+      font-family:'Dancing Script',cursive;font-size:3.5rem;font-weight:700;
+      background:linear-gradient(135deg,#e8003f,#ff4f7e,#e8003f,#cc0036);
+      background-size:300% 300%;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:gradShift 4s ease infinite,titleDrop 1s cubic-bezier(.16,1,.3,1) forwards;
+      opacity:0;filter:blur(10px);
+    }
+    @keyframes titleDrop{
+      0%{opacity:0;filter:blur(10px);transform:translateY(-30px) scale(1.2)}
+      100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}
+    }
+    .celeb-gif{
+      width:180px;height:180px;object-fit:cover;border-radius:50%;
+      margin:28px 0;
+      box-shadow:0 8px 30px rgba(219,39,119,0.2);
+      animation:titleDrop 0.8s cubic-bezier(.16,1,.3,1) 0.4s forwards;
+      opacity:0;
+    }
+    .scroll-cue{
+      margin-top:50px;display:flex;flex-direction:column;align-items:center;
+      gap:8px;opacity:0;animation:fadeUp 1s ease 1.8s forwards;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .scroll-cue span{
+      font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;
+      color:rgba(232,0,63,0.4);font-weight:600;
+    }
+    .scroll-line{
+      width:1px;height:50px;
+      background:linear-gradient(to bottom,rgba(232,0,63,0.5),transparent);
+      animation:lineGrow 2s ease infinite;
+    }
+    @keyframes lineGrow{0%,100%{transform:scaleY(0.5);opacity:0.3}50%{transform:scaleY(1);opacity:1}}
+
+    /* ---- Letter Section ---- */
+    .letter-wrap{
+      max-width:560px;width:100%;position:relative;
+      padding:2px;border-radius:20px;
+      background:linear-gradient(135deg,rgba(232,0,63,0.4),rgba(255,79,126,0.4),rgba(232,0,63,0.4));
+      background-size:200% 200%;animation:gradShift 6s ease infinite;
+    }
+    .letter-inner{
+      background:rgba(255,255,255,0.9);backdrop-filter:blur(20px);
+      border-radius:18px;padding:36px 28px;
+    }
+    #letterContent{
+      font-size:1.05rem;color:#4a2040;
+      line-height:1.9;letter-spacing:0.3px;min-height:100px;
+    }
+    #letterContent .hl{
+      background:linear-gradient(135deg,#e8003f,#ff4f7e);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;font-weight:700;
+    }
+    .cursor-blink{
+      display:inline-block;width:2px;height:1.15em;
+      background:linear-gradient(to bottom,#e8003f,#ff4f7e);
+      margin-left:2px;vertical-align:text-bottom;
+      animation:blink .7s step-end infinite;
+    }
+    @keyframes blink{50%{opacity:0}}
+    .letter-sign{
+      font-family:'Dancing Script',cursive;font-size:1.5rem;
+      background:linear-gradient(135deg,#e8003f,#ff4f7e);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      text-align:right;margin-top:24px;
+      opacity:0;transition:opacity 1s ease;
+    }
+    .letter-sign.show{opacity:1}
+
+    /* ---- Memory Photo Scenes ---- */
+    .memory-scene{
+      scroll-snap-align:center;
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:60px 24px;position:relative;z-index:10;
+      perspective:800px;
+    }
+
+    .photo-frame{
+      position:relative;max-width:380px;width:100%;
+      opacity:0;transform:var(--enter-transform);
+      transition:all 1.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .photo-frame.visible{
+      opacity:1;transform:rotate(var(--tilt,0deg)) translateY(0) translateX(0) scale(1);
+    }
+    .photo-inner{
+      border-radius:16px;overflow:hidden;position:relative;
+      box-shadow:0 15px 40px rgba(0,0,0,0.1),0 0 30px rgba(232,0,63,0.08);
+    }
+    .photo-inner img{
+      width:100%;aspect-ratio:4/5;object-fit:cover;display:block;
+      transition:transform 6s ease;
+    }
+    .photo-frame.visible .photo-inner img{
+      transform:scale(1.05);
+    }
+    /* Gradient overlay on photo bottom */
+    .photo-inner::after{
+      content:'';position:absolute;bottom:0;left:0;right:0;height:35%;
+      background:linear-gradient(to top,rgba(255,240,245,0.6),transparent);
+      pointer-events:none;
+    }
+    .photo-caption{
+      font-family:'Dancing Script',cursive;
+      font-size:1.3rem;color:#8e3a5e;
+      text-align:center;margin-top:20px;
+      opacity:0;transform:translateY(15px);
+      transition:all 0.8s ease 0.5s;
+    }
+    .photo-frame.visible .photo-caption{
+      opacity:1;transform:translateY(0);
+    }
+
+    /* Floating ring behind each photo */
+    .ring{
+      position:absolute;border-radius:50%;
+      border:1px solid rgba(232,0,63,0.12);
+      pointer-events:none;
+      animation:ringPulse 4s ease-in-out infinite;
+    }
+    @keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.15);opacity:0.2}}
+    .ring-1{width:300px;height:300px;top:-40px;left:-40px;animation-delay:0s}
+    .ring-2{width:400px;height:400px;top:-90px;left:-90px;animation-delay:1s}
+    .ring-3{width:500px;height:500px;top:-140px;left:-140px;animation-delay:2s}
+
+    /* ---- Finale ---- */
+    .finale{
+      scroll-snap-align:center;
+      min-height:80vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:60px 24px;z-index:10;position:relative;
+    }
+    .finale-text{
+      font-family:'Dancing Script',cursive;font-size:3rem;font-weight:700;
+      background:linear-gradient(135deg,#e8003f,#ff4f7e,#e8003f);
+      background-size:200% 200%;animation:gradShift 4s ease infinite;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      opacity:0;transform:translateY(40px) scale(0.9);
+      transition:all 1.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .finale-text.show{opacity:1;transform:translateY(0) scale(1)}
+    .finale-year{
+      font-family:'Space Grotesk',sans-serif;
+      font-size:0.85rem;letter-spacing:4px;text-transform:uppercase;
+      color:rgba(232,0,63,0.35);margin-top:20px;
+      opacity:0;transition:opacity 1s ease 0.5s;
+    }
+    .finale-year.show{opacity:1}
+
+    /* ---- Responsive ---- */
+    @media(max-width:500px){
+      .neon-title{font-size:1.7rem}
+      .mega-title{font-size:2.4rem}
+      .card-3d img{width:210px;height:210px}
+      .glow-border-inner{padding:30px 20px}
+      .photo-frame{max-width:300px}
+      .letter-inner{padding:28px 18px}
+      .finale-text{font-size:2.2rem}
+    }
+
+    /* ============ HELLO KITTY BOWS ============ */
+    .hk-bow{
+      position:fixed;pointer-events:none;z-index:1;
+      animation:bowFloat 15s ease-in-out infinite alternate;
+    }
+    .hk-bow svg{filter:drop-shadow(0 4px 12px rgba(255,0,60,0.15))}
+    @keyframes bowFloat{
+      0%{transform:translate(0,0) rotate(0deg)}
+      25%{transform:translate(15px,-25px) rotate(8deg)}
+      50%{transform:translate(-10px,15px) rotate(-5deg)}
+      75%{transform:translate(20px,10px) rotate(12deg)}
+      100%{transform:translate(-5px,-15px) rotate(-3deg)}
+    }
+
+    /* ============ HELLO KITTY WHISKERS ============ */
+    .hk-whisker{
+      position:fixed;pointer-events:none;z-index:1;opacity:0.06;
+      animation:whiskerDrift 20s ease-in-out infinite alternate;
+    }
+    @keyframes whiskerDrift{
+      0%{transform:translateX(0) rotate(0deg)}
+      100%{transform:translateX(30px) rotate(5deg)}
+    }
+
+    /* ============ FLOATING KITTY ITEMS ============ */
+    .kitty-bg{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+    .kitty-float{
+      position:absolute;bottom:-50px;
+      animation:kittyRise linear infinite;
+      opacity:0;
+      filter:drop-shadow(0 2px 8px rgba(255,0,60,0.1));
+    }
+    @keyframes kittyRise{
+      0%{transform:translateY(0) rotate(0deg) scale(0.6);opacity:0}
+      10%{opacity:0.5}
+      50%{opacity:0.35}
+      100%{transform:translateY(-110vh) rotate(180deg) scale(1);opacity:0}
+    }
+
+    /* ============ MOUSE GLOW ============ */
+    .mouse-glow{
+      position:fixed;width:300px;height:300px;
+      border-radius:50%;pointer-events:none;z-index:2;
+      background:radial-gradient(circle,rgba(232,0,63,0.07) 0%,transparent 70%);
+      transform:translate(-50%,-50%);
+      transition:left 0.1s ease,top 0.1s ease;
+    }
+
+    /* ============ CLICK RIPPLE ============ */
+    .ripple{
+      position:fixed;border-radius:50%;pointer-events:none;z-index:99;
+      border:2px solid rgba(232,0,63,0.35);
+      animation:rippleGrow 0.8s ease forwards;
+    }
+    @keyframes rippleGrow{
+      0%{width:0;height:0;opacity:1;transform:translate(-50%,-50%)}
+      100%{width:150px;height:150px;opacity:0;transform:translate(-50%,-50%)}
+    }
+
+    /* Preload hints */
+    link[rel=preload]{display:none}
   </style>
-  <!-- Preload images so transitions feel instant -->
   <link rel="preload" as="image" href="./images/image1.gif">
-  <link rel="preload" as="image" href="./images/image2.gif">
-  <link rel="preload" as="image" href="./images/image3.gif">
-  <link rel="preload" as="image" href="./images/image4.gif">
-  <link rel="preload" as="image" href="./images/image5.gif">
-  <link rel="preload" as="image" href="./images/image6.gif">
   <link rel="preload" as="image" href="./images/image7.gif">
 </head>
-<body class="gradient-background">
-  <main class="flex items-center justify-center h-screen">
-    <section class="flex flex-col items-center p-4">
-      <img
-        id="imageDisplay"
-        src="./images/image1.gif"
-        alt="Cute kitten with flowers"
-        class="rounded-md h-[300px] object-cover"
-      />
-      <h1 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4">
-        Will you be my Valentine?
-      </h1>
-      <div id="responseButtons" class="flex gap-4 pt-5 items-center">
-        <button
-          id="yesButton"
-          class="bounce inline-flex items-center justify-center whitespace-nowrap rounded-md text-xl font-medium cursor-pointer px-4 py-2 bg-green-500 text-white transition-all duration-300 ease-in-out hover:bg-green-400 min-h-12 min-w-[75px]"
-        >
-          Yes
-        </button>
-        <button
-          id="noButton"
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xl font-medium cursor-pointer px-4 py-2 bg-red-500 text-white transition-colors hover:bg-red-700 h-12 min-w-[75px]"
-        >
-          No
-        </button>
+<body>
+
+  <!-- BG Canvases -->
+  <canvas id="starCanvas"></canvas>
+  <canvas id="particleCanvas"></canvas>
+  <div class="kitty-bg" id="kittyBg"></div>
+  <div class="mouse-glow" id="mouseGlow"></div>
+
+  <!-- Hello Kitty Bow Decorations -->
+  <div class="hk-bow" style="top:8%;left:5%;animation-delay:0s">
+    <svg width="50" height="34" viewBox="0 0 50 34"><path d="M25 17c-3-8-15-16-23-12s-2 14 5 14c4 0 8-2 10-5 0 0 4 7 8 7s8-7 8-7c2 3 6 5 10 5 7 0 13-10 5-14S28 9 25 17z" fill="#e8003f"/></svg>
+  </div>
+  <div class="hk-bow" style="top:15%;right:8%;animation-delay:-4s">
+    <svg width="40" height="27" viewBox="0 0 50 34"><path d="M25 17c-3-8-15-16-23-12s-2 14 5 14c4 0 8-2 10-5 0 0 4 7 8 7s8-7 8-7c2 3 6 5 10 5 7 0 13-10 5-14S28 9 25 17z" fill="#ff4f7e"/></svg>
+  </div>
+  <div class="hk-bow" style="bottom:12%;left:12%;animation-delay:-9s">
+    <svg width="35" height="24" viewBox="0 0 50 34"><path d="M25 17c-3-8-15-16-23-12s-2 14 5 14c4 0 8-2 10-5 0 0 4 7 8 7s8-7 8-7c2 3 6 5 10 5 7 0 13-10 5-14S28 9 25 17z" fill="#e8003f"/></svg>
+  </div>
+  <div class="hk-bow" style="bottom:20%;right:6%;animation-delay:-13s">
+    <svg width="45" height="30" viewBox="0 0 50 34"><path d="M25 17c-3-8-15-16-23-12s-2 14 5 14c4 0 8-2 10-5 0 0 4 7 8 7s8-7 8-7c2 3 6 5 10 5 7 0 13-10 5-14S28 9 25 17z" fill="#ff4f7e"/></svg>
+  </div>
+  <div class="hk-bow" style="top:45%;left:3%;animation-delay:-6s">
+    <svg width="30" height="20" viewBox="0 0 50 34"><path d="M25 17c-3-8-15-16-23-12s-2 14 5 14c4 0 8-2 10-5 0 0 4 7 8 7s8-7 8-7c2 3 6 5 10 5 7 0 13-10 5-14S28 9 25 17z" fill="#e8003f"/></svg>
+  </div>
+
+  <!-- Hello Kitty Whisker Decorations -->
+  <div class="hk-whisker" style="top:30%;right:3%">
+    <svg width="100" height="30" viewBox="0 0 100 30">
+      <line x1="0" y1="8" x2="45" y2="12" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="15" x2="45" y2="15" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="22" x2="45" y2="18" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="12" x2="100" y2="8" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="15" x2="100" y2="15" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="18" x2="100" y2="22" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="hk-whisker" style="bottom:35%;left:2%;animation-delay:-10s">
+    <svg width="80" height="24" viewBox="0 0 100 30">
+      <line x1="0" y1="8" x2="45" y2="12" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="15" x2="45" y2="15" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="22" x2="45" y2="18" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="12" x2="100" y2="8" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="15" x2="100" y2="15" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="55" y1="18" x2="100" y2="22" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Ambient Orbs (Hello Kitty palette) -->
+  <div class="orb" style="width:400px;height:400px;top:10%;left:-10%;background:#ffcdd2"></div>
+  <div class="orb" style="width:350px;height:350px;top:50%;right:-8%;background:#fff9c4;animation-delay:-7s"></div>
+  <div class="orb" style="width:300px;height:300px;bottom:5%;left:30%;background:#f8bbd0;animation-delay:-13s"></div>
+
+  <!-- ===== PAGE 1: THE QUESTION ===== -->
+  <div class="main-section" id="mainSection">
+    <div class="glow-border">
+      <div class="glow-border-inner card-3d" id="card3d">
+        <img id="imageDisplay" src="./images/image1.gif" alt="Cute kitten" />
+        <h1 class="neon-title" id="valentineQ">Himu ji, will you be my Valentine?</h1>
+        <div class="buttons">
+          <button id="yesButton" class="btn-yes">Yes</button>
+          <button id="noButton" class="btn-no">No</button>
+        </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
-  <script>
-    (() => {
-      // DOM references
-      const yesButton = document.getElementById('yesButton');
-      const noButton = document.getElementById('noButton');
-      const imageDisplay = document.getElementById('imageDisplay');
-      const valentineQuestion = document.getElementById('valentineQuestion');
-      const responseButtons = document.getElementById('responseButtons');
+  <!-- ===== THE JOURNEY ===== -->
+  <div id="journey">
+    <div class="snap-container" id="snapContainer">
 
-      // Configuration
-      const GROWTH_PER_CLICK = 35;
-      const FONT_GROWTH_PER_CLICK = 25;
-      const MAX_NO_CLICKS = 5;
+      <!-- Celebration -->
+      <div class="snap-section">
+        <div class="mega-title">Yayyy!! I love you Himu ji</div>
+        <img class="celeb-gif" src="./images/image7.gif" alt="Celebrating" />
+        <div class="scroll-cue">
+          <span>scroll down for a surprise</span>
+          <div class="scroll-line"></div>
+        </div>
+      </div>
 
-      const IMAGE_PATHS = [
-        './images/image1.gif',
-        './images/image2.gif',
-        './images/image3.gif',
-        './images/image4.gif',
-        './images/image5.gif',
-        './images/image6.gif',
-        './images/image7.gif',
-      ];
+      <!-- Love Letter -->
+      <div class="snap-section" style="min-height:auto;padding:80px 24px">
+        <div class="letter-wrap">
+          <div class="letter-inner">
+            <div id="letterContent"></div>
+            <div class="letter-sign" id="letterSign">Yours, always & forever</div>
+          </div>
+        </div>
+      </div>
 
-      const NO_BUTTON_MESSAGES = [
-        'No',
-        'Are you sure?',
-        'Pookie please',
-        "Don't do this to me :(",
-        "You're breaking my heart",
-        "I'm gonna cry...",
-      ];
+      <!-- Memory 1 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateX(-150px) rotate(-12deg) scale(0.7);--tilt:-2deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple5.jpeg" alt="Fairy light nights"/></div>
+          <div class="photo-caption">Our fairy light nights... Lana playing, world shut out</div>
+        </div>
+      </div>
 
-      const ALT_TEXTS = [
-        'Cute kitten with flowers',
-        'Sad kitten looking up',
-        'Kitten begging',
-        'Heartbroken kitten',
-        'Crying kitten',
-        'Devastated kitten',
-        'Happy kitten celebrating',
-      ];
+      <!-- Memory 2 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateX(150px) rotate(10deg) scale(0.7);--tilt:2deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple3.jpeg" alt="Social date night"/></div>
+          <div class="photo-caption">You in that white dress at Social... a dream I got to live</div>
+        </div>
+      </div>
 
-      // State
-      let noClickCount = 0;
-      let buttonHeight = 48;
-      let buttonWidth = 80;
-      let fontSize = 20;
+      <!-- Memory 3 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateY(100px) rotate(6deg) scale(0.6);--tilt:-1deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple2.jpeg" alt="Mirror selfie"/></div>
+          <div class="photo-caption">Every mirror selfie with you is my favourite photo</div>
+        </div>
+      </div>
 
-      noButton.addEventListener('click', () => {
-        if (noClickCount >= MAX_NO_CLICKS) return;
+      <!-- Memory 4 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateX(-150px) rotate(-8deg) scale(0.7);--tilt:3deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple6.jpeg" alt="Neon hearts"/></div>
+          <div class="photo-caption">Hearts everywhere... but mine only beats for you</div>
+        </div>
+      </div>
 
-        noClickCount++;
+      <!-- Memory 5 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:scale(0.3) rotate(0deg);--tilt:0deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple1.jpeg" alt="Roses" style="aspect-ratio:3/4"/></div>
+          <div class="photo-caption">Roses for my rose... never "too much"</div>
+        </div>
+      </div>
 
-        // Update image and alt text
-        imageDisplay.src = IMAGE_PATHS[noClickCount];
-        imageDisplay.alt = ALT_TEXTS[noClickCount];
+      <!-- Memory 6 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateX(150px) rotate(12deg) scale(0.7);--tilt:-2deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple7.jpeg" alt="Her smile"/></div>
+          <div class="photo-caption">This smile... the reason I survive the distance</div>
+        </div>
+      </div>
 
-        // Grow the "Yes" button to make it harder to ignore
-        buttonHeight += GROWTH_PER_CLICK;
-        buttonWidth += GROWTH_PER_CLICK;
-        fontSize += FONT_GROWTH_PER_CLICK;
+      <!-- Memory 7 -->
+      <div class="memory-scene">
+        <div class="photo-frame" style="--enter-transform:translateY(120px) rotate(-6deg) scale(0.6);--tilt:1deg" data-reveal>
+          <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+          <div class="photo-inner"><img src="./images/couple4.jpeg" alt="Little Himu"/></div>
+          <div class="photo-caption">Little Himu... wish I'd known you forever</div>
+        </div>
+      </div>
 
-        yesButton.style.height = `${buttonHeight}px`;
-        yesButton.style.width = `${buttonWidth}px`;
-        yesButton.style.fontSize = `${fontSize}px`;
+      <!-- Finale -->
+      <div class="finale" id="finale">
+        <div class="finale-text" id="finaleText">Here's to forever, Himu ji</div>
+        <div class="finale-year" id="finaleYear">Happy Valentine's Day 2026</div>
+      </div>
+    </div>
+  </div>
 
-        // Update "No" button text with increasingly desperate messages
-        noButton.textContent = NO_BUTTON_MESSAGES[noClickCount];
+<script>
+(() => {
+  // =============== STARFIELD CANVAS ===============
+  const sc = document.getElementById('starCanvas');
+  const sctx = sc.getContext('2d');
+  let stars = [];
+
+  function resizeStar() {
+    sc.width = window.innerWidth;
+    sc.height = window.innerHeight;
+    stars = Array.from({length: 200}, () => ({
+      x: Math.random() * sc.width,
+      y: Math.random() * sc.height,
+      r: Math.random() * 1.5 + 0.3,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.01,
+    }));
+  }
+  resizeStar();
+  window.addEventListener('resize', resizeStar);
+
+  function drawStars() {
+    sctx.clearRect(0, 0, sc.width, sc.height);
+    stars.forEach(s => {
+      s.a += s.da;
+      if (s.a > 1 || s.a < 0.1) s.da *= -1;
+      sctx.beginPath();
+      sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      sctx.fillStyle = `rgba(232,0,63,${s.a * 0.12})`;
+      sctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  // =============== FLOATING PARTICLE CANVAS ===============
+  const pc = document.getElementById('particleCanvas');
+  const pctx = pc.getContext('2d');
+  let particles = [];
+  let mouseX = -1000, mouseY = -1000;
+
+  function resizeParticle() {
+    pc.width = window.innerWidth;
+    pc.height = window.innerHeight;
+    particles = Array.from({length: 60}, () => ({
+      x: Math.random() * pc.width,
+      y: Math.random() * pc.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 2.5 + 1,
+      color: ['#ff4f7e','#ffb7c5','#e8003f','#ffd54f'][Math.floor(Math.random()*4)],
+    }));
+  }
+  resizeParticle();
+  window.addEventListener('resize', resizeParticle);
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY;
+  });
+
+  function drawParticles() {
+    pctx.clearRect(0, 0, pc.width, pc.height);
+
+    particles.forEach(p => {
+      // Attract towards mouse gently
+      const dx = mouseX - p.x, dy = mouseY - p.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 250 && dist > 0) {
+        p.vx += dx / dist * 0.02;
+        p.vy += dy / dist * 0.02;
+      }
+      p.vx *= 0.99; p.vy *= 0.99;
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = pc.width;
+      if (p.x > pc.width) p.x = 0;
+      if (p.y < 0) p.y = pc.height;
+      if (p.y > pc.height) p.y = 0;
+
+      pctx.beginPath();
+      pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      pctx.fillStyle = p.color;
+      pctx.globalAlpha = 0.35;
+      pctx.fill();
+      pctx.globalAlpha = 1;
+    });
+
+    // Draw lines between close particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 120) {
+          pctx.beginPath();
+          pctx.moveTo(particles[i].x, particles[i].y);
+          pctx.lineTo(particles[j].x, particles[j].y);
+          pctx.strokeStyle = `rgba(232,0,63,${(1 - d/120) * 0.1})`;
+          pctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // =============== KITTY CURSOR TRAIL ===============
+  const trailItems = ['\u{1F43E}','\u{1F380}','\u2B50','\u{1F431}'];
+  let lastTrail = 0;
+  document.addEventListener('mousemove', e => {
+    const now = Date.now();
+    if (now - lastTrail < 80) return;
+    lastTrail = now;
+    const h = document.createElement('span');
+    h.className = 'trail-heart';
+    h.textContent = trailItems[Math.floor(Math.random() * trailItems.length)];
+    h.style.left = (e.clientX - 8) + 'px';
+    h.style.top = (e.clientY - 8) + 'px';
+    h.style.color = ['#e8003f','#ff4f7e','#ffb7c5'][Math.floor(Math.random()*3)];
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1000);
+  });
+
+  // =============== FLOATING KITTY ITEMS BG ===============
+  const kittyBg = document.getElementById('kittyBg');
+  const kittyEmojis = ['\u{1F43E}','\u{1F380}','\u{1F431}','\u2B50','\u{1F338}','\u{1F36D}'];
+  function spawnKittyItem() {
+    const el = document.createElement('span');
+    el.className = 'kitty-float';
+    el.textContent = kittyEmojis[Math.floor(Math.random()*kittyEmojis.length)];
+    el.style.left = Math.random()*100+'%';
+    el.style.fontSize = (Math.random()*18+12)+'px';
+    el.style.animationDuration = (Math.random()*8+7)+'s';
+    el.style.animationDelay = Math.random()*3+'s';
+    kittyBg.appendChild(el);
+    setTimeout(()=>el.remove(), 18000);
+  }
+  setInterval(spawnKittyItem, 600);
+  for(let i=0;i<12;i++) setTimeout(spawnKittyItem, i*250);
+
+  // =============== MOUSE GLOW ===============
+  const glow = document.getElementById('mouseGlow');
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX+'px';
+    glow.style.top = e.clientY+'px';
+  });
+
+  // =============== CLICK RIPPLE ===============
+  document.addEventListener('click', e => {
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = e.clientX+'px';
+    r.style.top = e.clientY+'px';
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(), 800);
+  });
+
+  // =============== MAGNETIC YES BUTTON ===============
+  const yesBtnEl = document.getElementById('yesButton');
+  yesBtnEl.addEventListener('mousemove', e => {
+    const rect = yesBtnEl.getBoundingClientRect();
+    const cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+    const dx = (e.clientX-cx)*0.25, dy = (e.clientY-cy)*0.25;
+    yesBtnEl.style.transform = `translate(${dx}px,${dy}px) scale(1.05)`;
+  });
+  yesBtnEl.addEventListener('mouseleave', () => {
+    yesBtnEl.style.transform = '';
+  });
+
+  // =============== 3D CARD TILT ===============
+  const card = document.getElementById('card3d');
+  const mainSec = document.getElementById('mainSection');
+  mainSec.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const rx = -(e.clientY - cy) / 25;
+    const ry = (e.clientX - cx) / 25;
+    card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  mainSec.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateX(0) rotateY(0)';
+    card.style.transition = 'transform 0.5s ease';
+    setTimeout(() => card.style.transition = 'transform 0.1s ease', 500);
+  });
+
+  // =============== QUESTION PAGE LOGIC ===============
+  const yesBtn = document.getElementById('yesButton');
+  const noBtn = document.getElementById('noButton');
+  const img = document.getElementById('imageDisplay');
+  const journey = document.getElementById('journey');
+
+  const IMGS = ['./images/image1.gif','./images/image2.gif','./images/image3.gif','./images/image4.gif','./images/image5.gif','./images/image6.gif','./images/image7.gif'];
+  const MSGS = ['No','Are you sure?','Pookie please',"Don't do this to me :(","You're breaking my heart","I'm gonna cry..."];
+  let noCount = 0, bH = 48, bW = 80, fS = 20;
+
+  function runAway() {
+    noCount = Math.min(noCount + 1, 5);
+    img.src = IMGS[Math.min(noCount, 5)];
+    bH += 35; bW += 35; fS += 25;
+    yesBtn.style.height = bH+'px'; yesBtn.style.width = bW+'px'; yesBtn.style.fontSize = fS+'px';
+    noBtn.textContent = MSGS[Math.min(noCount, MSGS.length-1)];
+    noBtn.classList.add('runaway');
+    const mxX = window.innerWidth - noBtn.offsetWidth - 20;
+    const mxY = window.innerHeight - noBtn.offsetHeight - 20;
+    noBtn.style.left = (Math.random()*mxX+10)+'px';
+    noBtn.style.top = (Math.random()*mxY+10)+'px';
+  }
+  noBtn.addEventListener('mouseenter', runAway);
+  noBtn.addEventListener('touchstart', e => { e.preventDefault(); runAway(); }, {passive:false});
+
+  // =============== YES → START JOURNEY ===============
+  yesBtn.addEventListener('click', () => {
+    const heart = confetti.shapeFromPath({path:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'});
+    const cfg = {spread:360,ticks:100,gravity:0,decay:0.94,startVelocity:20,shapes:[heart],colors:['#e8003f','#ff4f7e','#ffb7c5','#ffd54f','#fff']};
+    confetti({...cfg,particleCount:60,scalar:2});
+    confetti({...cfg,particleCount:30,scalar:3});
+    confetti({...cfg,particleCount:15,scalar:4});
+    let b=0;
+    const ci=setInterval(()=>{confetti({...cfg,particleCount:20,scalar:2,startVelocity:15});if(++b>10)clearInterval(ci)},350);
+
+    mainSec.style.transition='opacity 1s ease,filter 0.8s ease';
+    mainSec.style.opacity='0';
+    mainSec.style.filter='blur(10px)';
+    setTimeout(()=>{
+      mainSec.style.display='none';
+      journey.style.display='block';
+      document.body.style.overflow='hidden';
+      window.scrollTo({top:0});
+      startTypewriter();
+      initScrollReveal();
+      initPhotoTilt();
+      initScrollConfetti();
+    },1000);
+  });
+
+  // =============== TYPEWRITER ===============
+  const LINES = [
+    {t:'Hey Himu ji,',p:600},{t:''},
+    {t:'Two years. {730 days} of us — and honestly, every single one was worth it.'},{t:''},
+    {t:"I know these last couple months haven't been easy. You're out there building your dream, running your own startup like the absolute boss you are — and I'm here in Bangalore, grinding through my internship. Some nights the distance hits different, not gonna lie."},{t:''},
+    {t:"But here's the thing — even when we're cities apart, you're still the {first person I want to talk to} when something good happens, and the only one who can make a bad day feel okay with just a voice note."},{t:''},
+    {t:"I miss our {fairy light nights} — tangled up in each other with Lana playing in the background, your head on my shoulder, the whole world shut out. I miss dragging you to {Social} for one more mirror selfie, you in that white dress looking like a dream while I'm just trying to keep up."},{t:''},
+    {t:'I miss buying you {roses} and watching you pretend they\'re "too much" while smiling the biggest smile. I miss your laugh. I miss your chaos. I miss us in the same room.'},{t:''},
+    {t:"And those {train station goodbyes} — watching you walk towards the platform, looking back one last time — those are the hardest moments of my life. But also proof that what we have is worth every kilometer between us."},{t:''},
+    {t:"Distance? That's temporary. What we have? That's {forever}."},{t:''},
+    {t:"So here's me, sitting in Bangalore, missing you more than words can say, asking you the simplest question with the most obvious answer —"},
+    {t:'{Will you be my Valentine? (Again. And every year after this.)}'},
+  ];
+
+  function startTypewriter() {
+    const el = document.getElementById('letterContent');
+    const sign = document.getElementById('letterSign');
+    el.innerHTML = '<span class="cursor-blink"></span>';
+    const cursor = el.querySelector('.cursor-blink');
+    let li=0,ci2=0,hlSpan=null;
+
+    function typeChar() {
+      if (li >= LINES.length) { cursor.remove(); sign.classList.add('show'); return; }
+      const line = LINES[li];
+      if (line.t === '') {
+        el.insertBefore(document.createElement('br'), cursor);
+        el.insertBefore(document.createElement('br'), cursor);
+        li++; ci2=0; setTimeout(typeChar,150); return;
+      }
+      if (ci2 < line.t.length) {
+        const ch = line.t[ci2];
+        if (ch === '{') { hlSpan = document.createElement('span'); hlSpan.className='hl'; el.insertBefore(hlSpan,cursor); ci2++; typeChar(); return; }
+        if (ch === '}') { hlSpan=null; ci2++; typeChar(); return; }
+        const node = document.createTextNode(ch);
+        if (hlSpan) hlSpan.appendChild(node); else el.insertBefore(node,cursor);
+        ci2++;
+        setTimeout(typeChar, ch==='.'||ch==='—'?55:ch===','?35:16);
+      } else {
+        el.insertBefore(document.createElement('br'),cursor);
+        li++; ci2=0; hlSpan=null;
+        setTimeout(typeChar, line.p||250);
+      }
+    }
+    setTimeout(typeChar, 1200);
+  }
+
+  // =============== SCROLL REVEAL ===============
+  function initScrollReveal() {
+    const container = document.getElementById('snapContainer');
+    const frames = container.querySelectorAll('[data-reveal]');
+    const finText = document.getElementById('finaleText');
+    const finYear = document.getElementById('finaleYear');
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          en.target.classList.add('visible');
+          // Mini confetti on photo appear
+          const r = en.target.getBoundingClientRect();
+          const cx = (r.left + r.width/2)/window.innerWidth;
+          const cy = (r.top + r.height/2)/window.innerHeight;
+          confetti({particleCount:12,spread:60,startVelocity:14,gravity:0.6,scalar:0.9,ticks:50,origin:{x:cx,y:cy},colors:['#e8003f','#ff4f7e','#ffb7c5','#ffd54f']});
+          obs.unobserve(en.target);
+        }
       });
+    },{root:container,threshold:0.25});
+    frames.forEach(f => obs.observe(f));
 
-      yesButton.addEventListener('click', () => {
-        imageDisplay.src = IMAGE_PATHS[IMAGE_PATHS.length - 1];
-        imageDisplay.alt = ALT_TEXTS[ALT_TEXTS.length - 1];
-        valentineQuestion.textContent = 'Yayyy!! :3';
-        responseButtons.style.display = 'none';
+    // Finale
+    const fObs = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          finText.classList.add('show');
+          finYear.classList.add('show');
+          const heart = confetti.shapeFromPath({path:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'});
+          confetti({particleCount:50,spread:360,gravity:0,decay:0.94,startVelocity:20,shapes:[heart],colors:['#e8003f','#ff4f7e','#ffb7c5','#ffd54f','#fff'],scalar:2.5});
+          fObs.unobserve(en.target);
+        }
+      });
+    },{root:container,threshold:0.4});
+    fObs.observe(document.getElementById('finale'));
+  }
 
-        // Heart-shaped confetti for a valentine theme
-        const heart = confetti.shapeFromPath({
-          path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+  // =============== 3D TILT ON PHOTOS ===============
+  function initPhotoTilt() {
+    document.querySelectorAll('.photo-inner').forEach(el => {
+      el.addEventListener('mousemove', e => {
+        const rect = el.getBoundingClientRect();
+        const cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+        const rx = -(e.clientY-cy)/15, ry = (e.clientX-cx)/15;
+        el.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+        el.style.transition = 'transform 0.1s ease';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+        el.style.transition = 'transform 0.4s ease';
+      });
+    });
+  }
+
+  // =============== SCROLL CONFETTI ===============
+  function initScrollConfetti() {
+    const container = document.getElementById('snapContainer');
+    let lastScroll = 0;
+    container.addEventListener('scroll', () => {
+      const now = Date.now();
+      if (now - lastScroll < 2000) return;
+      lastScroll = now;
+      if (Math.random() > 0.5) {
+        confetti({
+          particleCount: 6, spread: 40, startVelocity: 10,
+          gravity: 0.8, scalar: 0.7, ticks: 40, drift: 0.5,
+          origin: { x: Math.random(), y: Math.random()*0.5 },
+          colors: ['#e8003f','#ff4f7e','#ffb7c5','#ffd54f'],
         });
-
-        const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 20, shapes: [heart], colors: ['#ff69b4', '#ff1493', '#ff6b81', '#e84393'] };
-
-        confetti({ ...defaults, particleCount: 50, scalar: 2 });
-        confetti({ ...defaults, particleCount: 25, scalar: 3 });
-        confetti({ ...defaults, particleCount: 10, scalar: 4 });
-      });
-    })();
-  </script>
+      }
+    });
+  }
+})();
+</script>
 </body>
 </html>
