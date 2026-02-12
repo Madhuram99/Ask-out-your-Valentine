@@ -363,6 +363,24 @@
       100%{width:150px;height:150px;opacity:0;transform:translate(-50%,-50%)}
     }
 
+    /* ============ MUSIC TOGGLE ============ */
+    .music-btn{
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      width:48px;height:48px;border-radius:50%;border:none;
+      background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);
+      box-shadow:0 4px 20px rgba(232,0,63,0.2);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:20px;transition:all 0.3s ease;
+      animation:fadeUp 1s ease 0.5s forwards;opacity:0;
+    }
+    .music-btn:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(232,0,63,0.3)}
+    .music-btn.playing{animation:fadeUp 1s ease 0.5s forwards,musicPulse 2s ease infinite}
+    @keyframes musicPulse{
+      0%,100%{box-shadow:0 4px 20px rgba(232,0,63,0.2)}
+      50%{box-shadow:0 4px 30px rgba(232,0,63,0.4),0 0 15px rgba(255,79,126,0.2)}
+    }
+    .yt-hidden{position:fixed;width:0;height:0;overflow:hidden;pointer-events:none;opacity:0}
+
     /* Preload hints */
     link[rel=preload]{display:none}
   </style>
@@ -529,6 +547,14 @@
       </div>
     </div>
   </div>
+
+  <!-- Hidden YouTube Player -->
+  <div class="yt-hidden" id="ytContainer">
+    <div id="ytPlayer"></div>
+  </div>
+
+  <!-- Music Toggle Button -->
+  <button class="music-btn" id="musicBtn" title="Toggle music" style="display:none">🔇</button>
 
 <script>
 (() => {
@@ -762,6 +788,7 @@
       initScrollReveal();
       initPhotoTilt();
       initScrollConfetti();
+      startMusic();
     },1000);
   });
 
@@ -883,6 +910,66 @@
       }
     });
   }
+
+  // =============== YOUTUBE BACKGROUND MUSIC ===============
+  let ytPlayer = null;
+  let musicPlaying = false;
+  const musicBtn = document.getElementById('musicBtn');
+
+  function startMusic() {
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+    musicBtn.style.display = 'flex';
+  }
+
+  // YouTube API calls this when ready
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('ytPlayer', {
+      videoId: '1OEron4rXfk',
+      playerVars: {
+        autoplay: 1,
+        loop: 1,
+        playlist: '1OEron4rXfk',
+        controls: 0,
+        showinfo: 0,
+        modestbranding: 1,
+        rel: 0,
+      },
+      events: {
+        onReady: function(e) {
+          e.target.setVolume(40);
+          e.target.playVideo();
+          musicPlaying = true;
+          musicBtn.textContent = '🎵';
+          musicBtn.classList.add('playing');
+        },
+        onStateChange: function(e) {
+          if (e.data === YT.PlayerState.PLAYING) {
+            musicPlaying = true;
+            musicBtn.textContent = '🎵';
+            musicBtn.classList.add('playing');
+          }
+        }
+      }
+    });
+  };
+
+  musicBtn.addEventListener('click', () => {
+    if (!ytPlayer) return;
+    if (musicPlaying) {
+      ytPlayer.pauseVideo();
+      musicPlaying = false;
+      musicBtn.textContent = '🔇';
+      musicBtn.classList.remove('playing');
+    } else {
+      ytPlayer.playVideo();
+      musicPlaying = true;
+      musicBtn.textContent = '🎵';
+      musicBtn.classList.add('playing');
+    }
+  });
 })();
 </script>
 </body>
